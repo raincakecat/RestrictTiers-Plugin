@@ -1,0 +1,8 @@
+.gradle/
+**/build/
+fabric/run/
+.idea/
+*.iml
+.env*
+*.log
+test-results/

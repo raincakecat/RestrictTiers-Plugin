@@ -1,0 +1,16 @@
+allprojects {
+    group = 'com.raincakecat.restricttiers'
+    version = '1.0.0'
+    repositories { mavenCentral() }
+}
+subprojects {
+    apply plugin: 'java'
+    java { toolchain { languageVersion = JavaLanguageVersion.of(21) }; withSourcesJar() }
+    tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8'; options.release = 21 }
+    dependencies {
+        testImplementation platform('org.junit:junit-bom:5.14.0')
+        testImplementation 'org.junit.jupiter:junit-jupiter'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+    }
+    test { useJUnitPlatform() }
+}

@@ -1,0 +1,5 @@
+name: RestrictTiersVerification
+version: 1.0.0
+main: com.raincakecat.restricttiers.verification.RuntimeVerification
+api-version: '1.21.11'
+depend: [RestrictTiers]

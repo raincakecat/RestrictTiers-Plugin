@@ -1,0 +1,14 @@
+repositories { maven { url = 'https://repo.papermc.io/repository/maven-public/' } }
+dependencies {
+    implementation project(':common')
+    implementation 'com.google.code.gson:gson:2.13.2'
+    compileOnly 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
+    testImplementation 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
+}
+jar {
+    archiveBaseName = 'RestrictTiers-Paper'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+    exclude 'META-INF/*.SF', 'META-INF/*.RSA', 'META-INF/*.DSA', 'module-info.class'
+    from('../licenses/Gson-LICENSE.txt') { into 'META-INF/licenses' }
+}

@@ -1,0 +1,6 @@
+name: RestrictTiers
+version: 1.0.0
+main: com.raincakecat.restricttiers.paper.RestrictTiersPlugin
+api-version: '1.21.11'
+description: Private, on-demand RestrictTiers lookups.
+website: https://restricttiers.raincakecat.com

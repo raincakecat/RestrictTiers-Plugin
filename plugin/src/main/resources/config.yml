@@ -1,0 +1,5 @@
+# Changes require a server restart. No permission node is required.
+command:
+  name: check
+  aliases:
+    - restrictcheck

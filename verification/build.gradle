@@ -1,0 +1,7 @@
+repositories { maven { url = 'https://repo.papermc.io/repository/maven-public/' } }
+dependencies {
+    compileOnly project(':plugin')
+    compileOnly project(':common')
+    compileOnly 'io.papermc.paper:paper-api:1.21.11-R0.1-SNAPSHOT'
+}
+jar { archiveBaseName = 'RestrictTiers-Verification-DO-NOT-INSTALL' }
