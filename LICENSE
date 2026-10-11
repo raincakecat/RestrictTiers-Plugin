@@ -1,0 +1,42 @@
+RestrictTiers Proprietary License — All Rights Reserved
+
+Copyright (c) 2026 raincakecat. All rights reserved.
+
+This license applies to the original RestrictTiers source code, documentation,
+assets, and compiled builds in this repository. Third-party components are
+excluded and remain governed by their respective licenses.
+
+1. Official binary use
+
+You may download, copy for installation, install, and run official, unmodified
+RestrictTiers JARs on your Minecraft clients and servers, including public
+servers. This permission does not grant ownership or rights to the source code.
+
+2. Source code and redistribution
+
+Except for the permissions above and the exceptions below, you must obtain
+prior written permission from raincakecat to reuse, reproduce, modify, create
+derivative works from, or redistribute the original source code, documentation,
+assets, or compiled builds. Distributing modified builds also requires prior
+written permission. Permission requests: contact@raincakecat.com.
+
+3. GitHub and other retained rights
+
+Public availability does not make this project open source. This license does
+not limit rights granted by GitHub's Terms of Service to view and fork a public
+repository through GitHub, or rights that cannot be restricted under applicable
+law. Such platform rights do not grant additional rights to reuse or distribute
+this project outside their scope.
+
+4. Third-party components
+
+Third-party libraries, tools, and runtime dependencies retain their own
+licenses. Refer to THIRD-PARTY-NOTICES.md and the licenses directory. Nothing
+in this license replaces or restricts permissions granted by those licenses.
+
+5. Disclaimer
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTIES OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND
+NONINFRINGEMENT. TO THE EXTENT PERMITTED BY APPLICABLE LAW, THE COPYRIGHT HOLDER
+IS NOT LIABLE FOR CLAIMS OR DAMAGES ARISING FROM USE OF THE SOFTWARE.

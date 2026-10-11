@@ -11,4 +11,5 @@ jar {
     from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
     exclude 'META-INF/*.SF', 'META-INF/*.RSA', 'META-INF/*.DSA', 'module-info.class'
     from('../licenses/Gson-LICENSE.txt') { into 'META-INF/licenses' }
+    from(rootProject.file('LICENSE')) { into 'META-INF'; rename { 'LICENSE-RestrictTiers.txt' } }
 }
