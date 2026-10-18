@@ -1,0 +1,93 @@
+name: Build and publish official release
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Stable version matching build.gradle, for example v1.0.0
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: official-release
+  cancel-in-progress: false
+jobs:
+  release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: write
+    env:
+      RELEASE_TAG: ${{ inputs.tag }}
+    steps:
+      - name: Validate version
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo 'Use a stable version such as v1.0.0'; exit 1; }
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-java@v6.1.0
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Build and run unit tests
+        shell: bash
+        run: sh ./gradlew --no-daemon build
+      - name: Select the installable JAR and generate checksum
+        id: artifact
+        shell: python
+        run: |
+          import hashlib, os, pathlib, re
+          version = os.environ['RELEASE_TAG'][1:]
+          repo = os.environ['GITHUB_REPOSITORY'].split('/')[-1]
+          if repo == 'RestrictTiers-Plugin':
+              jar = pathlib.Path('plugin/build/libs/RestrictTiers-Paper-' + version + '.jar')
+          elif repo == 'RestrictTiers-Mod':
+              candidates = [p for p in pathlib.Path('fabric/build/libs').glob('RestrictTiers-Fabric-*-' + version + '.jar') if not re.search(r'-(sources|dev|javadoc|test|common)\b', p.name)]
+              if len(candidates) != 1:
+                  raise SystemExit('Expected exactly one installable Fabric JAR matching the version.')
+              jar = candidates[0]
+          else:
+              raise SystemExit('This workflow is intended for the RestrictTiers plugin or mod repository.')
+          if not jar.is_file():
+              raise SystemExit('No matching installable JAR. Ensure the requested tag matches build.gradle.')
+          checksum = jar.with_suffix(jar.suffix + '.sha256')
+          checksum.write_text(hashlib.sha256(jar.read_bytes()).hexdigest() + '  ' + jar.name + '\n', encoding='utf-8')
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write('jar=' + str(jar) + '\nchecksum=' + str(checksum) + '\n')
+      - name: Publish release with the official JAR
+        env:
+          GH_TOKEN: ${{ github.token }}
+          JAR: ${{ steps.artifact.outputs.jar }}
+          CHECKSUM: ${{ steps.artifact.outputs.checksum }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create "$RELEASE_TAG" "$JAR" "$CHECKSUM" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "$RELEASE_TAG" --generate-notes --fail-on-no-commits
+      # Releases created with GITHUB_TOKEN do not trigger a second release workflow.
+      # Announce here too; the separate workflow handles releases published manually.
+      - name: Announce in Discord when configured
+        env:
+          DISCORD_RELEASE_WEBHOOK: ${{ secrets.DISCORD_RELEASE_WEBHOOK }}
+        shell: python
+        run: |
+          import json, os, urllib.parse, urllib.request
+          webhook = os.environ.get('DISCORD_RELEASE_WEBHOOK', '')
+          if not webhook:
+              print('Release published. Discord announcement skipped: no webhook secret configured.')
+              raise SystemExit(0)
+          parsed = urllib.parse.urlparse(webhook)
+          if parsed.scheme != 'https' or parsed.hostname not in ('discord.com', 'discordapp.com') or not parsed.path.startswith('/api/webhooks/'):
+              raise SystemExit('Release published, but DISCORD_RELEASE_WEBHOOK is not a valid Discord webhook.')
+          repo, tag = os.environ['GITHUB_REPOSITORY'], os.environ['RELEASE_TAG']
+          payload = {'allowed_mentions': {'parse': []}, 'embeds': [{'title': repo.split('/')[-1] + ' � ' + tag, 'description': 'A new official release is available. Download the JAR and read the release notes on GitHub.', 'url': 'https://github.com/' + repo + '/releases/tag/' + urllib.parse.quote(tag, safe=''), 'color': 12184960}]}
+          request = urllib.request.Request(webhook, data=json.dumps(payload).encode(), headers={'Content-Type': 'application/json', 'User-Agent': 'RestrictTiers-Release-Bot/1.0'}, method='POST')
+          try:
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  if response.status not in (200, 204):
+                      raise SystemExit('Release published, but Discord rejected the announcement.')
+          except Exception:
+              raise SystemExit('Release published, but Discord announcement failed. No webhook URL was logged.') from None
