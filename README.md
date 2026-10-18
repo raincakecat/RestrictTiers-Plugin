@@ -2,6 +2,10 @@
 
 Paper plugin for Minecraft **1.21.11 and 26.3**. Run `/check <IGN or UUID>` or `/restrictcheck <IGN or UUID>` for private restriction counts, a clickable website profile, and cached parsed details. No automatic checks, permission requirement, or LuckPerms dependency.
 
+## Downloads
+
+[Download the latest official release](https://github.com/raincakecat/RestrictTiers-Plugin/releases/latest). Install the `RestrictTiers-Paper-*.jar` asset, not the source archives. Each automated release includes a SHA-256 checksum beside the JAR.
+
 ## License
 
 **All Rights Reserved.** You may install and run official, unmodified JARs on your clients and servers. Reusing, modifying, or redistributing the original code or distributing builds requires prior written permission, subject to the GitHub and third-party exceptions in [LICENSE](LICENSE). This is source-visible proprietary software. Third-party components retain their own licenses.
