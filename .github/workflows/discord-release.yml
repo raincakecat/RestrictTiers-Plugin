@@ -1,0 +1,43 @@
+name: Announce stable release on Discord
+on:
+  release:
+    types: [published]
+permissions:
+  contents: read
+jobs:
+  announce:
+    if: ${{ !github.event.release.prerelease && !github.event.release.draft }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Announce published release
+        env:
+          DISCORD_RELEASE_WEBHOOK: ${{ secrets.DISCORD_RELEASE_WEBHOOK }}
+        shell: python
+        run: |
+          import json, os, urllib.request, urllib.parse
+          webhook = os.environ.get('DISCORD_RELEASE_WEBHOOK', '')
+          parsed = urllib.parse.urlparse(webhook)
+          if parsed.scheme != 'https' or parsed.hostname not in ('discord.com', 'discordapp.com') or not parsed.path.startswith('/api/webhooks/'):
+              raise SystemExit('Configure DISCORD_RELEASE_WEBHOOK as a repository Actions secret with a Discord webhook URL.')
+          with open(os.environ['GITHUB_EVENT_PATH'], encoding='utf-8') as file:
+              event = json.load(file)
+          release = event['release']
+          repo = event['repository']['name']
+          body = (release.get('body') or 'See GitHub for downloads and details.')[:3500]
+          payload = {
+              'allowed_mentions': {'parse': []},
+              'embeds': [{
+                  'title': (repo + ' � ' + release['tag_name'])[:256],
+                  'description': body,
+                  'url': release['html_url'],
+                  'color': 12184960,
+                  'footer': {'text': 'RestrictTiers � Official GitHub release'}
+              }]
+          }
+          request = urllib.request.Request(webhook, data=json.dumps(payload).encode(), headers={'Content-Type': 'application/json', 'User-Agent': 'RestrictTiers-Release-Bot/1.0'}, method='POST')
+          try:
+              with urllib.request.urlopen(request, timeout=20) as response:
+                  if response.status not in (200, 204):
+                      raise SystemExit('Discord rejected the announcement.')
+          except Exception:
+              raise SystemExit('Discord announcement failed. Check the webhook and Actions run; no webhook URL was logged.') from None
